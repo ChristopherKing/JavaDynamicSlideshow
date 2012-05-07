@@ -100,6 +100,7 @@ public class DynamicSlideshow extends JFrame {
         //load folder
         File datFolder = new File(folder);
         File[] imageFiles = datFolder.listFiles(new OnlyImage());
+        Image[] images = null;
         //if the folder is empty
         if(imageFiles == null) {
             System.out.println("The folder was empty or did not contain images.");
@@ -107,20 +108,23 @@ public class DynamicSlideshow extends JFrame {
         }
         //otherwise it has something in it
         else {
-            
+            images = new Image[imageFiles.length];
+            //populate image array with new images from file list in files array
+            for(int i=0;i<imageFiles.length;i++) {
+                images[i] = Toolkit.getDefaultToolkit().createImage(imageFiles[i].getAbsolutePath());
+            }
         }
-        
-        
-        return null;
+        return images;
     }
     
+    //Should return a long int representing the most recently modified file's modification time
     public long getLatestModified(File[] files) {
         long longTime = 0L;
         if(files == null)
             return 0L;
         else {
             //find the most recently modified file time
-            for(int i=0;i<files.length-1;i++) {
+            for(int i=0;i<files.length;i++) {
                 if(files[i].lastModified() > longTime)
                     longTime = files[i].lastModified();
             }
