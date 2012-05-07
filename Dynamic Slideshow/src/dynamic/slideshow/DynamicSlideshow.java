@@ -36,7 +36,7 @@ public class DynamicSlideshow extends JFrame {
                     Integer.parseInt(args[2]),
                     DisplayMode.REFRESH_RATE_UNKNOWN);
         } else {
-            displayMode = new DisplayMode(800, 600, 16, DisplayMode.REFRESH_RATE_UNKNOWN);
+            displayMode = new DisplayMode(800, 600, 32, DisplayMode.REFRESH_RATE_UNKNOWN);
         }
 
         DynamicSlideshow test = new DynamicSlideshow();
