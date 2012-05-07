@@ -32,8 +32,10 @@ public class DynamicSlideshow extends JFrame {
  
  
     Image screenImage; // downloaded image  
+    Image[] slideshow;
     int w, h; // Display height and width 
     String folder;
+    long modified;
  
  
     // Program entry 
@@ -49,6 +51,7 @@ public class DynamicSlideshow extends JFrame {
     DynamicSlideshow(String source) throws MalformedURLException { 
  
         this.folder = source;
+        this.modified = 0L;
         // Exiting program on window close 
         addWindowListener(new WindowAdapter() { 
             public void windowClosing(WindowEvent e) { 
@@ -82,6 +85,7 @@ public class DynamicSlideshow extends JFrame {
         System.out.println("Display resolution: " + String.valueOf(w) + "x" + String.valueOf(h));
  
         //load images
+        this.slideshow = loadImages(null);
         //
         if (source.startsWith("http://")) // http:// URL was specified 
             screenImage = Toolkit.getDefaultToolkit().getImage(new URL(source));
@@ -96,7 +100,7 @@ public class DynamicSlideshow extends JFrame {
      * current modification timstamps in the folder are more recent than the
      * stored one all the images in the folder will be reloaded.
      */
-    public Image[] loadImages() {
+    private Image[] loadImages(Image[] oldImages) {
         //load folder
         File datFolder = new File(folder);
         File[] imageFiles = datFolder.listFiles(new OnlyImage());
@@ -108,17 +112,27 @@ public class DynamicSlideshow extends JFrame {
         }
         //otherwise it has something in it
         else {
-            images = new Image[imageFiles.length];
-            //populate image array with new images from file list in files array
-            for(int i=0;i<imageFiles.length;i++) {
-                images[i] = Toolkit.getDefaultToolkit().createImage(imageFiles[i].getAbsolutePath());
+            //check modified timestamps
+            //if the new file list has been modified since last update then reload images
+            if(getLatestModified(imageFiles) > this.modified) {
+                images = new Image[imageFiles.length];
+                //populate image array with new images from file list in files array
+                for(int i=0;i<imageFiles.length;i++) {
+                    images[i] = Toolkit.getDefaultToolkit().createImage(imageFiles[i].getAbsolutePath());
+                }
+                return images;
             }
+            //otherwise continue using old images
+            else {
+                return oldImages;
+            }
+            
         }
         return images;
     }
     
     //Should return a long int representing the most recently modified file's modification time
-    public long getLatestModified(File[] files) {
+    public static long getLatestModified(File[] files) {
         long longTime = 0L;
         if(files == null)
             return 0L;
