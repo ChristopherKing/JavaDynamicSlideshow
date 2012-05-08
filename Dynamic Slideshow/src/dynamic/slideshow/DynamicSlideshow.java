@@ -22,7 +22,7 @@ public class DynamicSlideshow extends JFrame {
     Image screenImage; // downloaded image  
     Image[] slideshow;
     int w, h; // Display height and width 
-    String folder;
+    private static final String folder = "C:\\testimages";
     long modified;
 
     // Program entry 
@@ -36,7 +36,7 @@ public class DynamicSlideshow extends JFrame {
                     Integer.parseInt(args[2]),
                     DisplayMode.REFRESH_RATE_UNKNOWN);
         } else {
-            displayMode = new DisplayMode(800, 600, 32, DisplayMode.REFRESH_RATE_UNKNOWN);
+            displayMode = new DisplayMode(1680, 1050, 32, DisplayMode.REFRESH_RATE_UNKNOWN);
         }
 
         DynamicSlideshow test = new DynamicSlideshow();
@@ -45,11 +45,8 @@ public class DynamicSlideshow extends JFrame {
     private static final int FONT_SIZE = 24;
     private static final long DEMO_TIME = 10000;
     private SimpleScreenManager screen;
-    private Image bgImage;
-    private Image opaqueImage;
-    private Image transparentImage;
-    private Image translucentImage;
-    private Image antiAliasedImage;
+    private Image drawnImage;
+    private int currentSlide;
     private boolean imagesLoaded;
 
     public void run(DisplayMode displayMode) {
@@ -57,6 +54,7 @@ public class DynamicSlideshow extends JFrame {
         setForeground(Color.white);
         setFont(new Font("Dialog", Font.PLAIN, FONT_SIZE));
         imagesLoaded = false;
+        slideshow = getImages();
 
         screen = new SimpleScreenManager();
 
@@ -74,10 +72,15 @@ public class DynamicSlideshow extends JFrame {
 
     public void loadImages() {
         //bgImage = loadImage("images/background.jpg");
-        opaqueImage = loadImage("C:\\testimages\\map.JPG");
+        //drawnImage = loadImage("C:\\testimages\\map.JPG");
         //transparentImage = loadImage("images/transparent.png");
         //translucentImage = loadImage("images/translucent.png");
         //antiAliasedImage = loadImage("images/antialiased.png");
+        
+        drawnImage = slideshow[currentSlide];
+        currentSlide++;
+        if(currentSlide >= slideshow.length)
+            currentSlide = 0;
         imagesLoaded = true;
         // signal to AWT to repaint this window
         repaint();
@@ -99,7 +102,7 @@ public class DynamicSlideshow extends JFrame {
         // draw images
         if (imagesLoaded) {
             //g.drawImage(bgImage, 0, 0, null);
-            drawImage(g, opaqueImage, 0, 0, "Opaque");
+            drawImage(g, drawnImage, 0, 0, "Opaque");
             //drawImage(g, transparentImage, 320, 0, "Transparent");
             //drawImage(g, translucentImage, 0, 300, "Translucent");
             //drawImage(g, antiAliasedImage, 320, 300, "Translucent (Anti-Aliased)");
@@ -120,7 +123,7 @@ public class DynamicSlideshow extends JFrame {
      * current modification timstamps in the folder are more recent than the
      * stored one all the images in the folder will be reloaded.
      */
-    private Image[] loadImages(Image[] oldImages) {
+    private Image[] getImages(Image[] oldImages) {
         //load folder
         File datFolder = new File(folder);
         File[] imageFiles = datFolder.listFiles(new OnlyImage());
@@ -144,6 +147,32 @@ public class DynamicSlideshow extends JFrame {
             else {
                 return oldImages;
             }
+
+        }
+        return images;
+    }
+    
+    private Image[] getImages() {
+        //load folder
+        File datFolder = new File(folder);
+        File[] imageFiles = datFolder.listFiles(new OnlyImage());
+        Image[] images = null;
+        //if the folder is empty
+        if (imageFiles == null) {
+            System.out.println("The folder was empty or did not contain images.");
+            System.exit(0);
+        } //otherwise it has something in it
+        else {
+            //check modified timestamps
+            //if the new file list has been modified since last update then reload images
+
+            images = new Image[imageFiles.length];
+            //populate image array with new images from file list in files array
+            for (int i = 0; i < imageFiles.length; i++) {
+                images[i] = loadImage(imageFiles[i].getAbsolutePath());
+            }
+            return images;
+
 
         }
         return images;
