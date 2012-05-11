@@ -43,31 +43,53 @@ public class DynamicSlideshow extends JFrame {
         test.run(displayMode);
     }
     private static final int FONT_SIZE = 24;
-    private static final long DEMO_TIME = 10000;
+    private static final long TRANSITION_TIME = 5000;
     private SimpleScreenManager screen;
     private Image drawnImage;
     private int currentSlide;
     private boolean imagesLoaded;
+    private boolean go;
 
     public void run(DisplayMode displayMode) {
         setBackground(Color.blue);
         setForeground(Color.white);
         setFont(new Font("Dialog", Font.PLAIN, FONT_SIZE));
         imagesLoaded = false;
-        slideshow = getImages();
+        slideshow = getImages(); //initial loading of images
 
         screen = new SimpleScreenManager();
 
         try {
             screen.setFullScreen(displayMode, this);
-            loadSlide(); //initial loading of images
-            try {
-                Thread.sleep(DEMO_TIME);
-            } catch (InterruptedException ex) {
+            go = true;
+            while(go) {
+                loadSlide(); //load the first image
+                /*try {
+                    Thread.sleep(TRANSITION_TIME);
+                } catch (InterruptedException ex) {
+                }*/
+                waiting(5);
+                
+                //if we just displayed the last image check if the images changed
+                if(currentSlide == slideshow.length-1) {
+                    slideshow = getImages(slideshow); //we give old slideshow as input to check against
+                }
             }
         } finally {
             screen.restoreScreen();
         }
+    }
+    
+    public static void waiting (int n){
+        
+        long t0, t1;
+
+        t0 =  System.currentTimeMillis();
+
+        do{
+            t1 = System.currentTimeMillis();
+        }
+        while ((t1 - t0) < (n * 1000));
     }
 
     /*
@@ -84,6 +106,8 @@ public class DynamicSlideshow extends JFrame {
         //translucentImage = loadImage("images/translucent.png");
         //antiAliasedImage = loadImage("images/antialiased.png");
         
+        if(drawnImage != null)
+            drawnImage.flush();
         drawnImage = slideshow[currentSlide];
         currentSlide++;
         if(currentSlide >= slideshow.length)
@@ -95,12 +119,12 @@ public class DynamicSlideshow extends JFrame {
 
     public void paint(Graphics g) {
         // set text anti-aliasing
-        if (g instanceof Graphics2D) {
+        /*if (g instanceof Graphics2D) {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(
                     RenderingHints.KEY_TEXT_ANTIALIASING,
                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        }
+        }*/
 
         // draw images
         if (imagesLoaded) {
