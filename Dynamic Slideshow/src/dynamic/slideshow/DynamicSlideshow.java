@@ -60,7 +60,7 @@ public class DynamicSlideshow extends JFrame {
 
         try {
             screen.setFullScreen(displayMode, this);
-            loadImages();
+            loadSlide(); //initial loading of images
             try {
                 Thread.sleep(DEMO_TIME);
             } catch (InterruptedException ex) {
@@ -70,7 +70,14 @@ public class DynamicSlideshow extends JFrame {
         }
     }
 
-    public void loadImages() {
+    /*
+     * This method changes the current slide and sets the drawnImage class
+     * variable to the image that is to be displayed next. It then signals that
+     * the image is loaded and signals the graphics engine to repaint the window.
+     * It also advances the slide counter or resets it to 0 so it will continuously
+     * display the images.
+     */
+    public void loadSlide() {
         //bgImage = loadImage("images/background.jpg");
         //drawnImage = loadImage("C:\\testimages\\map.JPG");
         //transparentImage = loadImage("images/transparent.png");
@@ -84,10 +91,6 @@ public class DynamicSlideshow extends JFrame {
         imagesLoaded = true;
         // signal to AWT to repaint this window
         repaint();
-    }
-
-    private Image loadImage(String fileName) {
-        return new ImageIcon(fileName).getImage();
     }
 
     public void paint(Graphics g) {
