@@ -36,7 +36,7 @@ public class DynamicSlideshow extends JFrame {
                     Integer.parseInt(args[2]),
                     DisplayMode.REFRESH_RATE_UNKNOWN);
         } else {
-            displayMode = new DisplayMode(1680, 1050, 32, DisplayMode.REFRESH_RATE_UNKNOWN);
+            displayMode = new DisplayMode(1680, 1050, 16, DisplayMode.REFRESH_RATE_UNKNOWN);
         }
 
         DynamicSlideshow test = new DynamicSlideshow();
@@ -102,7 +102,7 @@ public class DynamicSlideshow extends JFrame {
         // draw images
         if (imagesLoaded) {
             //g.drawImage(bgImage, 0, 0, null);
-            drawImage(g, drawnImage, 0, 0, "Opaque");
+            drawImage(g, drawnImage, 0, 0, "Image " + currentSlide);
             //drawImage(g, transparentImage, 320, 0, "Transparent");
             //drawImage(g, translucentImage, 0, 300, "Translucent");
             //drawImage(g, antiAliasedImage, 320, 300, "Translucent (Anti-Aliased)");
@@ -169,7 +169,8 @@ public class DynamicSlideshow extends JFrame {
             images = new Image[imageFiles.length];
             //populate image array with new images from file list in files array
             for (int i = 0; i < imageFiles.length; i++) {
-                images[i] = loadImage(imageFiles[i].getAbsolutePath());
+                //images[i] = loadImage(imageFiles[i].getAbsolutePath());
+                images[i] = Toolkit.getDefaultToolkit().createImage(imageFiles[i].getAbsolutePath());
             }
             return images;
 
