@@ -1,7 +1,10 @@
 package dynamic.slideshow;
 
 
-import java.awt.*;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Window;
 import javax.swing.JFrame;
 
 /**
@@ -15,10 +18,14 @@ public class SimpleScreenManager {
     /**
         Creates a new SimpleScreenManager object.
     */
-    public SimpleScreenManager() {
-        GraphicsEnvironment environment =
-            GraphicsEnvironment.getLocalGraphicsEnvironment();
-        device = environment.getDefaultScreenDevice();
+    public SimpleScreenManager(int screen) {
+        GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice[] temp = environment.getScreenDevices();
+        device = temp[screen];
+    }
+    
+    public GraphicsDevice getDevice() {
+        return device;
     }
 
 
