@@ -5,6 +5,8 @@
 package dynamic.slideshow;
 
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -22,7 +24,7 @@ public class DynamicSlideshow extends JFrame {
     private static final long serialVersionUID = 1L;
     private BufferedImage[] slideshow;
     private int w, h; // Display height and width 
-    private static final String folder = "C:\\testimages";
+    private static final String folder = "Z:\\test";
     private long modified;
     private static final int FONT_SIZE = 24;
     private static final long TRANSITION_TIME = 5000;
@@ -34,30 +36,40 @@ public class DynamicSlideshow extends JFrame {
     // Program entry 
     public static void main(String[] args) throws Exception {
         DisplayMode displayMode;
+        int screenNum = 0;
 
-        if (args.length == 3) {
-            displayMode = new DisplayMode(
-                    Integer.parseInt(args[0]),
-                    Integer.parseInt(args[1]),
-                    Integer.parseInt(args[2]),
-                    DisplayMode.REFRESH_RATE_UNKNOWN);
-        } else {
-            displayMode = new DisplayMode(1680, 1050, 16, DisplayMode.REFRESH_RATE_UNKNOWN);
+        if(args.length == 1) {
+            screenNum = Integer.parseInt(args[0]);
+        }
+        
+        else {
+            screenNum = 0;
         }
 
         DynamicSlideshow test = new DynamicSlideshow();
-        test.run(displayMode);
+        test.run(screenNum);
     }
 
 
-    public void run(DisplayMode displayMode) {
+    public void run(int screenNum) {
         setBackground(Color.blue);
         setForeground(Color.white);
         setFont(new Font("Dialog", Font.PLAIN, FONT_SIZE));
         imagesLoaded = false;
         slideshow = getImages(); //initial loading of images
 
-        screen = new SimpleScreenManager();
+        screen = new SimpleScreenManager(screenNum);
+        h = screen.getDevice().getDisplayMode().getHeight();
+        w = screen.getDevice().getDisplayMode().getWidth();
+        DisplayMode displayMode = new DisplayMode(w, h, 16, DisplayMode.REFRESH_RATE_UNKNOWN);
+        
+        this.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent ev) {
+                if(ev.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE)
+                    System.exit(0);
+            }
+        });
 
         try {
             screen.setFullScreen(displayMode, this);
@@ -76,7 +88,7 @@ public class DynamicSlideshow extends JFrame {
                 currentSlide++; //advance the slide
 
                 //if we just displayed the last image check if the images changed
-                if (currentSlide == slideshow.length - 1) {
+                if (currentSlide == slideshow.length) {
                     slideshow = getImages(slideshow); //we give old slideshow as input to check against
                     currentSlide = 0; //reset slide counter because we were at the end
                 }
@@ -98,11 +110,13 @@ public class DynamicSlideshow extends JFrame {
         } while ((t1 - t0) < (n * 1000));
     }
 
+    @Override
     public void paint(Graphics g) {
         // draw images
         if (imagesLoaded) {
             //drawImage(g, slideshow[currentSlide], 0, 0, "Image " + currentSlide);
-            g.drawImage(slideshow[currentSlide], 0, 0, null);
+            //g.drawImage(slideshow[currentSlide].getScaledInstance(w, h, java.awt.Image.SCALE_FAST), w / 2 - slideshow[currentSlide].getWidth()/2, h / 2 - slideshow[currentSlide].getHeight()/2, null);
+            g.drawImage(slideshow[currentSlide].getScaledInstance(w, h, java.awt.Image.SCALE_SMOOTH), 0, 0, null);
         } else {
             g.drawString("Loading Images...", 5, FONT_SIZE);
         }
@@ -135,11 +149,11 @@ public class DynamicSlideshow extends JFrame {
             //if the new file list has been modified since last update then reload images
             long temp = getLatestModified(imageFiles); //store time in temp var so files are only accessed once
             if (temp > this.modified) {
-                modified = temp; //store new modified time
+                this.modified = temp; //store new modified time
                 
                 //flush old images out of memory
-                for (int i = 0; i < images.length; i++) {
-                    images[i].flush();
+                for (int i = 0; i < oldImages.length; i++) {
+                    oldImages[i].flush();
                 }
                 images = new BufferedImage[imageFiles.length]; //new array
                 //populate image array with new images from file list in files array
